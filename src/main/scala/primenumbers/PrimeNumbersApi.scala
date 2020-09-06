@@ -1,5 +1,6 @@
 package primenumbers
 
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.ThriftMux
 import com.twitter.server.TwitterServer
 import primenumbers.thrift.PrimeNumbersService
@@ -25,17 +26,17 @@ object PrimeNumbersApi extends TwitterServer {
 
     case class Results(primes: List[Int])
 
-    val api: Endpoint[List[Int]] = get("prime") {
-      client.getPrimeNumbers(10).map { results => Ok(results.toList) }
+    val api = get("prime" :: path[Int]) { n: Int =>
+      client.getPrimeNumbers(n).map { results => Ok(AsyncStream.fromSeq(results)) }
     }
 
     val server = Http.server
       .withLabel("proxy-service-server")
       .withResponseClassifier(HttpResponseClassifier.ServerErrorsAsFailures)
+      .withStreaming(true)
       .serve(s":${port()}", service = api.toService)
 
     closeOnExit(server)
     Await.ready(server)
-
   }
 }
