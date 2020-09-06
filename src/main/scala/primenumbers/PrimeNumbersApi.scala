@@ -13,6 +13,7 @@ import io.circe.generic.auto._
 import io.finch.syntax.get
 import primenumbers.thrift.PrimeNumbersService
 
+
 object PrimeNumbersApi extends TwitterServer {
 
   private val port = flag[Int]("port", 8081, "Port for the proxy service server")
@@ -28,8 +29,11 @@ object PrimeNumbersApi extends TwitterServer {
 
     case class Results(primes: List[Int])
 
-    val api = get("prime" :: path[Int]) { n: Int =>
+    val api = get("prime" :: path[Int].should(beGreaterThan(2))) { n: Int =>
       client.getPrimeNumbers(n).map { results => Ok(AsyncStream.fromSeq(results)) }
+        .onFailure(e => println(s"An error occurred while calling the prime numbers server: ${e.getMessage}"))
+    }.handle {
+      case e: RequestTimeoutException => RequestTimeout(e)
     }
 
     val server = Http.server
