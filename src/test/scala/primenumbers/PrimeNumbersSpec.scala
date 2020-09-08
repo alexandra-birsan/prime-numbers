@@ -15,12 +15,12 @@ class PrimeNumbersSpec extends fixture.FlatSpec with ServiceIntegrationSuite wit
 
   private val primeNumbersServer: ListeningServer = PrimeNumbersServer.server
 
-  "Get prime numbers" should "return a Bad Request response when the parameter is negative" in { service =>
+  "Get prime numbers" should "return a Bad Request response when the parameter is a negative number" in { service =>
     val response: Response = service(Request("/prime/-5"))
     assertResult(Status.BadRequest)(response.status)
   }
 
-  it should "return a Bad Request response when the parameter is less than 2" in { service =>
+  it should "return a Bad Request response when the parameter is a positive number less than 2" in { service =>
     val response: Response = service(Request("/prime/1"))
     assertResult(Status.BadRequest)(response.status)
   }
@@ -46,7 +46,7 @@ class PrimeNumbersSpec extends fixture.FlatSpec with ServiceIntegrationSuite wit
 
 object PrimeNumbersSpec {
 
-  def extractNumberListFromResponse(response: Response): List[Int] = {
+  private def extractNumberListFromResponse(response: Response): List[Int] = {
     response.contentString.split("\\n").map(_.toInt).toList
   }
 }
