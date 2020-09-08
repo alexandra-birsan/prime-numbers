@@ -3,7 +3,7 @@ package primenumbers
 import java.util.concurrent.Executors
 
 import com.twitter.finagle.{ListeningServer, ThriftMux}
-import com.twitter.finagle.thrift.Protocols
+import com.twitter.finagle.thrift.{Protocols, RichServerParam}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.server.TwitterServer
 import com.twitter.util.{Await, Future, FuturePool}
@@ -22,7 +22,8 @@ object PrimeNumbersServer extends TwitterServer {
     else Future.value(2 to n filter isPrime)
   }
 
-  val finagledService: PrimeNumbersService.FinagledService = new PrimeNumbersService.FinagledService(service, Protocols.binaryFactory())
+  val finagledService = new PrimeNumbersService.FinagledService(service,
+    RichServerParam(Protocols.binaryFactory(), "prime-number-server"))
 
   val server: ListeningServer = ThriftMux.server
     .withExecutionOffloaded(FuturePool.interruptible(serverThreadPool))
@@ -30,14 +31,14 @@ object PrimeNumbersServer extends TwitterServer {
     .withLabel("prime-number-server")
     .serve(s":${port()}", finagledService)
 
-  def main(): Unit = {
-    closeOnExit(server)
-    Await.ready(server)
-  }
-
   private val primes = 2 #:: Stream.from(3, 2).filter(isPrime)
 
   private def isPrime(n: Int): Boolean = {
     primes.takeWhile(p => p * p <= n).forall(n % _ != 0)
+  }
+
+  def main(): Unit = {
+    closeOnExit(server)
+    Await.ready(server)
   }
 }
