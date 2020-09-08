@@ -20,7 +20,7 @@ In case the processing on the server takes more than expected, then there's a re
 was no longer capable of serving other requests. For this reason, the serverThreadPool and the withExecutionOffloaded
 configurations are used in PrimeNumbersServer.
  
-#To use the app:
+# To use the app:
 1. sbt publish-local
 2. sbt "runMain primenumbers.PrimeNumbersServer -port 8082  -admin.port :8085" (to start the prime numbers server)
 3. sbt "runMain primenumbers.PrimeNumbersApi -port 8081" (to start the proxy service)
