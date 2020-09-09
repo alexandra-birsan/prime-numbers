@@ -17,7 +17,7 @@ import primenumbers.thrift.PrimeNumbersService
 object PrimeNumbersApi extends TwitterServer {
 
   private val port = flag[Int]("port", 8081, "Port for the proxy service server")
-  private val thriftClientRequestTimeout = Duration.fromSeconds(10)
+  private val thriftClientRequestTimeout = Duration.fromSeconds(20)
 
   val client: PrimeNumbersService.MethodPerEndpoint = ThriftMux.client
     .withRequestTimeout(thriftClientRequestTimeout)

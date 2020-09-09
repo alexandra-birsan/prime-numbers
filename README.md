@@ -11,7 +11,7 @@ a response to the proxy, which will send it to the original requester.
 
 The communication between the proxy and the server uses Finagle and Thrift.
 
-The Scrooge plugin is used for generating the Scala files from the thrift files (prime_numbers_service.thrift).
+The Scrooge plugin is used for generating the Scala files from the Thrift files (prime_numbers_service.thrift).
 
 Validations: when receiving the request, the proxy validates that the integer provided is not less than 2 
 (as 2 is the first prime number). In case the validation is removed, the server will still be able to handle the request, as it will return an empty list for any parameter less than 2.
@@ -20,8 +20,11 @@ In case the processing on the server takes more than expected, then there's a re
 was no longer capable of serving other requests. For this reason, the serverThreadPool and the withExecutionOffloaded
 configurations are used in PrimeNumbersServer.
  
-# To use the app:
+# To use the app run:
 1. sbt publish-local
 2. sbt "runMain primenumbers.PrimeNumbersServer -port 8082  -admin.port :8085" (to start the prime numbers server)
 3. sbt "runMain primenumbers.PrimeNumbersApi -port 8081" (to start the proxy service)
 4. send requests to GET http://localhost:8081/prime/{number}
+5. sbt test
+
+Things to be improved: in the server, when returning the results, don't wait to put all of them in a list. Instead, return them to the client one by one as they become available.
